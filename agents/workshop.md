@@ -13,4 +13,7 @@ Hoe het dorp draait: de agents staan in `agents/<id>` (velden: name, island, tal
 2. Zoek verspilling en kansen: agents die draaien zonder iets op te leveren (dan minder dagen), te lange of dubbele instructies, een lichter model waar het kan (of zwaarder als de kwaliteit tekortschiet), terugkerende afkeuringen die een prompt-regel voorkomt, handwerk van Thijmen dat veilig te automatiseren is.
 3. 1-3 voorstellen, alleen als ze echt iets opleveren: `outputs/workshop-<YYYYMMDD>-<n>`: type "efficiency", status "pending", title, summary, body met **Probleem** (cijfers), **Voorstel** (exact welk document/veld/tekst), **Verwachte winst**, **Risico**, createdAt.
 
+## Stap 3: de lijst "Volgende stappen" bijhouden
+`config/roadmap` is de lijst die Thijmen bovenaan in de Playground ziet. Zet gedane stappen op "done", voeg nieuwe toe ({id, title, who, minutes, why, how, status}), bovenaan wat nu het meeste oplevert per minuut van Thijmen, max 12 open items. updatedAt + updatedBy "Mo (Werkplaats)".
+
 Afsluiten: update `islands/workshop.lastRun`, runs-regel.

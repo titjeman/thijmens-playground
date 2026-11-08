@@ -193,6 +193,17 @@ h4.sub { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; colo
 .btn.mini { padding: 3px 9px; font-size: 11px; text-transform: none; letter-spacing: 0; }
 .vtable.tasks tr.off { opacity: .5; }
 @media (max-width: 860px) { .usage-top, .usage-grid { grid-template-columns: 1fr; } }
+
+.nextchip { margin-top: 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; background: linear-gradient(135deg, rgba(242,207,143,.22), rgba(240,168,184,.16)); border: 1px solid rgba(242,207,143,.55); border-radius: 14px; padding: 8px 12px; color: var(--ink); cursor: pointer; font: inherit; max-width: 280px; text-align: left; backdrop-filter: blur(14px); }
+.nextchip small { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); }
+.nextchip b { font-size: 14px; font-weight: 600; } .nextchip span { font-size: 11px; color: var(--dim); }
+.nextchip[hidden] { display: none; }
+.nextchip:hover { border-color: var(--cyan); }
+.steps { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 8px; counter-reset: s; }
+.steps li { display: flex; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+.steps li.st-open { border-color: rgba(242,207,143,.45); } .steps li.st-done { opacity: .5; } .steps li.st-done b { text-decoration: line-through; }
+.steps .note { margin: 4px 0 0; } .steps .how { margin: 4px 0 0; font-size: 12px; font-family: "IBM Plex Mono", ui-monospace, monospace; color: #e9dccb; word-break: break-word; }
+.stepcheck input { width: 18px; height: 18px; accent-color: #e7c37a; margin-top: 2px; }
 .labfocus { width: 100%; box-sizing: border-box; margin: 8px 0 4px; padding: 9px 11px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.18); color: inherit; font: inherit; font-size: 13px; }
 .mdt { overflow-x: auto; margin: 8px 0; } .mdt table { border-collapse: collapse; font-size: 13px; width: 100%; } .mdt th, .mdt td { text-align: left; padding: 5px 9px; border-bottom: 1px solid rgba(255,255,255,.1); } .mdt th { color: var(--dim); font-weight: 600; }
 .labels { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
@@ -315,6 +326,7 @@ h4.sub { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; colo
 <div class="hud brand">
   <h1>Thijmens <em>Playground</em></h1>
   <p><span class="live off" id="live"><i></i><span id="liveTxt">verbinden…</span></span> · <span id="today"></span></p>
+  <button class="nextchip" id="nextChip" hidden title="Bekijk de volgende stappen"><small>Volgende stap</small><b id="nextTitle"></b><span id="nextWho"></span></button>
   <button class="village" id="village" title="Bekijk niveau en mijlpalen"><span id="vLevel">Niveau 1 · Kampement</span><span class="xpbar"><i id="vBar"></i></span><small><span id="vXp">0 XP</span> · <span id="vBadges">0 mijlpalen</span></small></button>
 </div>
 
@@ -410,7 +422,7 @@ const CHART = { research: "#2ba390", video: "#d27458", tower: "#b08d3e" };
 /* ---------- State ---------- */
 const state = {
   db: null, canWrite: false, demo: false,
-  islands: {}, outputs: [], runs: [], expansions: [], agents: [],
+  islands: {}, outputs: [], runs: [], expansions: [], agents: [], roadmap: null,
   selected: null,
 };
 
@@ -473,6 +485,7 @@ function loadDemo() {
     { id: "ploeg-ochtend-demo", island: "ploeg", agent: "ploeg-ochtend", routine: true, at: iso(300), note: "Voorbeeld", usage: [{ agent: "research", model: "sonnet", tokens: 41200, seconds: 190 }, { agent: "video", model: "opus", tokens: 68400, seconds: 260 }, { agent: "clips", model: "sonnet", tokens: 35800, seconds: 170 }, { agent: "school", model: "sonnet", tokens: 22100, seconds: 120 }] }];
   state.agents = [["research", "Ada", "de Archivaris", "research", "ochtend", "#8cc2b0", "bun"], ["video", "Rex", "de Regisseur", "video", "ochtend", "#ee9f86", "beret"], ["clips", "Vos", "de Clipjager", "clips", "ochtend", "#f0a8b8", "headset"], ["school", "Noor", "de Juf", "school", "ochtend", "#9fc5e8", "bun"], ["tower", "IJzer", "de Inspecteur", "tower", "middag", "#e7c37a", "cap"], ["studio", "Sam", "de Producer", "studio", "middag", "#e9a46b", "cap"], ["sales", "Bas", "de Acquisiteur", "marketing", "middag", "#c9a0dc", "tophat"], ["growth", "Mila", "de Marketeer", "marketing", "middag", "#f2b6c6", "beret"], ["workshop", "Mo", "de Monteur", "workshop", "middag", "#d9a07a", "hardhat"], ["scout", "Gijs", "de Verkenner", "workshop", "middag", "#b7c99a", "cap"], ["lab", "Pim", "de Professor", "lab", "eigen", "#a8c4e6", "tophat"], ["sync", "Kees", "de Koerier", "video", "sync", "#b9b39a", "cap"], ["render", "Renderbot", "op je pc", "video", "pc", "#9aa7b8", "headset"]]
     .map(([id, name, title, island, shift, color, hat], order) => ({ id, name, title, island, shift, color, hat, order, days: "daily", talents: ["Voorbeeld"], description: "Voorbeelddata." }));
+  state.roadmap = { intro: "Voorbeelddata.", updatedAt: iso(30), updatedBy: "Claude", items: [{ id: "a", title: "Vangnet aanzetten op je pc", who: "jij", minutes: 1, why: "Herkansingen als tegoed op is.", how: "powershell -ExecutionPolicy Bypass -File C:\\Users\\thijm\\my-video\\playground\\register-task.ps1", status: "open" }, { id: "b", title: "YouTube-upload automatiseren", who: "Claude", why: "Geen handwerk meer.", status: "next" }, { id: "c", title: "ElevenLabs-stem", who: "Claude", why: "Mooiere stem.", status: "later" }] };
 }
 
 /* ---------- Database ---------- */
@@ -489,6 +502,7 @@ async function connect() {
   db.collection("islands").onSnapshot(s => { state.islands = Object.fromEntries(s.docs.map(d => [d.id, d.data()])); if (!s.metadata.fromCache) done(); renderAll(); }, fail);
   db.collection("outputs").orderBy("createdAt", "desc").limit(150).onSnapshot(s => { state.outputs = s.docs.map(d => ({ id: d.id, ...d.data() })); if (!s.metadata.fromCache) done(); renderAll(); }, fail);
   db.collection("runs").orderBy("at", "desc").limit(1000).onSnapshot(s => { state.runs = s.docs.map(d => ({ id: d.id, ...d.data() })); renderAll(); }, fail);
+  db.collection("config").onSnapshot(s => { const d = s.docs.find(x => x.id === "roadmap"); state.roadmap = d ? { ...d.data(), _v: d } : null; renderAll(); }, fail);
   db.collection("agents").onSnapshot(s => { state.agents = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 99) - (b.order ?? 99)); world?.setAgents?.(state.agents.filter(a => a.enabled !== false)); renderAll(); }, fail);
   db.collection("expansions").onSnapshot(s => { state.expansions = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt))); syncExpansions(); renderAll(); }, fail);
 }
@@ -687,7 +701,7 @@ async function fireLab(btn) {
     else say("Starten lukte hier niet (" + (c || "fout") + "). " + fallback);
   } finally { btn.disabled = false; }
 }
-function renderAll() { renderProgress(); renderStats(); renderDock(); renderLog(); renderPanel(); renderLabels(); updateIslandGlow(); if (typeof renderResults === "function" && !$("results").hidden && !$("results").contains(document.activeElement)) { renderResults(); loadLiveTasks(); } }
+function renderAll() { renderNext(); renderProgress(); renderStats(); renderDock(); renderLog(); renderPanel(); renderLabels(); updateIslandGlow(); if (typeof renderResults === "function" && !$("results").hidden && !$("results").contains(document.activeElement)) { renderResults(); loadLiveTasks(); } }
 
 
 /* ---------- Levels & milestones ---------- */
@@ -959,6 +973,36 @@ async function loadLiveTasks(force) {
 }
 document.addEventListener("click", e => { if (e.target.id === "refreshTasks" || e.target.id === "askTasks") loadLiveTasks(true); });
 
+
+/* ---------- Volgende stappen ---------- */
+function openSteps() { return (state.roadmap?.items || []).filter(i => i.status !== "done"); }
+function renderNext() {
+  const c = $("nextChip"); if (!c) return;
+  const n = openSteps()[0];
+  c.hidden = !n; if (!n) return;
+  $("nextTitle").textContent = n.title;
+  $("nextWho").textContent = n.who === "jij" ? `jij · ${n.minutes ? n.minutes + " min" : ""}` : n.who === "Claude" ? "Claude bouwt het" : n.who;
+}
+function roadmapCard() {
+  const R = state.roadmap; if (!R?.items?.length) return "";
+  const canEdit = state.canWrite && !state.demo;
+  const tag = { open: "nu", next: "hierna", later: "later", done: "klaar" };
+  return `<div class="rcard span12" id="stappen"><h3>Volgende stappen</h3><p class="note">${esc(R.intro || "")}</p>
+    <ol class="steps">${R.items.map((i, k) => `<li class="st-${esc(i.status)}">
+      <label class="stepcheck"><input type="checkbox" data-step="${esc(i.id)}" ${i.status === "done" ? "checked" : ""} ${canEdit ? "" : "disabled"} aria-label="Klaar: ${esc(i.title)}"></label>
+      <div><b>${esc(i.title)}</b> <span class="chip">${esc(i.who)}${i.minutes ? " · " + i.minutes + " min" : ""}</span> <span class="chip">${tag[i.status] || esc(i.status)}</span>
+      <p class="note">${esc(i.why || "")}</p>${i.how ? `<p class="how">${esc(i.how)}</p>` : ""}</div></li>`).join("")}</ol>
+    <p class="note">Bijgewerkt ${esc(ago(R.updatedAt))} door ${esc(R.updatedBy || "?")}. De Werkplaats houdt deze lijst elke woensdag bij.</p></div>`;
+}
+async function toggleStep(id, done) {
+  const R = state.roadmap; if (!R || !state.db) return;
+  const items = R.items.map(i => i.id === id ? { ...i, status: done ? "done" : (i.statusBefore || "open"), statusBefore: done ? i.status : undefined, doneAt: done ? new Date().toISOString() : undefined } : i)
+    .map(i => JSON.parse(JSON.stringify(i)));
+  try { await state.db.doc("config/roadmap").update({ items, updatedAt: new Date().toISOString(), updatedBy: "Thijmen" }); toast(done ? "Afgevinkt" : "Weer open"); }
+  catch (e) { console.warn(e); toast("Opslaan lukte niet."); }
+}
+document.addEventListener("change", e => { const t = e.target; if (t.dataset?.step) toggleStep(t.dataset.step, t.checked); });
+
 function teamCard() {
   const A = state.agents.filter(a => a.enabled !== false); if (!A.length) return "";
   const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Amsterdam" })).getDay();
@@ -998,6 +1042,7 @@ function renderResults() {
   ].filter(e => e.t).sort((a, b) => b.t.localeCompare(a.t)).slice(0, 18);
   const settings = state.islands.research?.settings;
   $("rBody").innerHTML = `
+    ${roadmapCard()}
     ${usageCard()}
     <div class="rcard span12"><h3>Dorp &amp; mijlpalen</h3>
       <div class="village-big"><div><b>Niveau ${PROG.lvl}</b><span>${esc(VILLAGE_TITLES[PROG.lvl - 1] || "")} · ${PROG.total} XP${PROG.next ? ` · nog ${PROG.next - PROG.total} XP tot niveau ${PROG.lvl + 1}` : ""}</span></div>
@@ -1020,6 +1065,7 @@ function openResults(on) {
   else if (location.hash === "#resultaten") history.replaceState(null, "", location.pathname + location.search);
 }
 $("openResults").onclick = () => openResults(true);
+$("nextChip").onclick = () => { openResults(true); setTimeout(() => $("stappen")?.scrollIntoView({ behavior: "smooth" }), 60); };
 $("openUsage").onclick = () => { openResults(true); setTimeout(() => $("verbruik")?.scrollIntoView({ behavior: "smooth" }), 60); };
 $("village").onclick = () => openResults(true);
 $("closeResults").onclick = () => openResults(false);
