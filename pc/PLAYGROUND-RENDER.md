@@ -26,7 +26,7 @@ Een job bevat `job.json`, `SCRIPT.md`, `episode.md` (shotplan, cast, world, soun
    Herstel alleen echte fouten (lege beelden, camera in een gebouw, onleesbare props, zie "Readability traps" in de skill).
 5. Geluid: de skill-audio-scripts in `playground/audio/` → `mix.wav` (muziek +3 dB, SFX -6 dB, stem ongewijzigd, ~-14 LUFS),
    inclusief de Keeper-thump aan het eind.
-6. Render: `npx remotion render src/index.ts Ep<YYYYMMDD> F:/temp/Playground/work/<code>/video.mp4 --codec h264 --crf 16 --scale 1.3333`,
+6. Render: `npx remotion render src/index.ts Ep<YYYYMMDD> F:/temp/Playground/work/<code>/video.mp4 --codec h264 --crf 16 --scale 1.3333333333333333 --gl=angle --browser-executable="C:/Program Files/Google/Chrome/Application/chrome.exe"`,
    dan muxen met mix.wav (`-map 0:v:0 -map 1:a:0`) → `F:\temp\Playground\videos\<code>\final.mp4`.
 7. QA: `python scripts/short_qa.py final.mp4 ...` Bij fouten: herstel en render opnieuw (maximaal 1 keer).
 8. Lever op in `F:\temp\Playground\videos\<code>\`:
@@ -34,7 +34,13 @@ Een job bevat `job.json`, `SCRIPT.md`, `episode.md` (shotplan, cast, world, soun
    - `preview.mp4`: `ffmpeg -i final.mp4 -vf scale=720:1280 -c:v libx264 -crf 28 -preset veryfast -c:a aac -b:a 96k preview.mp4` (moet < 18 MB zijn, anders crf 30),
    - `cover.jpg` (een sterk frame, 1080x1920),
    - `platform-texts.md` (kopie uit de job),
-   - `done.json`: `{"id": "<outputs-id uit job.json>", "code": "<code>", "seconds": <duur>, "renderedAt": "<ISO>", "qa": "ok|<probleem>", "voice": "<stem>"}`.
+   - **Schone versie voor docenten** (zelfde beeld, vloeken weggepiept):
+     1. Zorg dat `stem_voice.wav`, `stem_music.wav` en `stem_sfx.wav` (op mixgain, zoals `warp_mix.py` ze schrijft) en `words.json` in `F:\temp\Playground\work\<code>\` staan.
+     2. `python playground/audio/clean_mix.py F:\temp\Playground\work\<code>` → `mix_clean.wav` + `clean_report.json`.
+        Controle: het aantal `replaced` in clean_report.json is gelijk aan het aantal keer "fucking" in SCRIPT.md, `lufs` ≈ -14 en `true_peak` ≤ -1.
+     3. `ffmpeg -i final.mp4 -i F:/temp/Playground/work/<code>/mix_clean.wav -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k final_clean.mp4`
+     4. `preview_clean.mp4`: zoals preview.mp4 maar van final_clean.mp4 (< 18 MB).
+   - `done.json`: `{"id": "<outputs-id uit job.json>", "code": "<code>", "seconds": <duur>, "renderedAt": "<ISO>", "qa": "ok|<probleem>", "voice": "<stem>", "clean": {"file": "final_clean.mp4", "preview": "preview_clean.mp4", "replaced": <aantal>}}` (lukt de schone versie niet: `"clean": null` en de reden in `qa`).
 9. Verplaats de job-map naar `F:\temp\Playground\inbox\_done\<code>\` en ruim `F:\temp\remotion-tmp\remotion-webpack-bundle-*` op (vraag het als verwijderen niet mag).
 
 ## Onderbroken? Zo ga je verder

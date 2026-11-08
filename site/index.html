@@ -988,7 +988,7 @@ function renderResults() {
     return `<tr>
       <td><div class="thumb" style="${o.coverUrl ? `background-image:url('${esc(o.coverUrl)}')` : ""}"></div></td>
       <td><b>${esc(o.title)}</b><br><span class="note">${esc(o.episodeCode || o.id)} · ${statusChip(o)} ${o.stage ? `<span class="chip">${esc((STAGES.find(x => x[0] === o.stage) || [0, o.stage])[1])}</span>` : ""} ${scoreChip(o)}</span></td>
-      <td>${o.videoUrl ? `<a class="dl" href="${esc(o.videoUrl)}" target="_blank" rel="noopener">Preview</a><br><span class="note">${esc(o.localPath || "")}</span>` : `<span class="note">${o.renderError ? "Render-fout" : "nog niet gerenderd"}</span>`}</td>
+      <td>${o.videoUrl ? `<a class="dl" href="${esc(o.videoUrl)}" target="_blank" rel="noopener">Preview</a>${o.cleanVideoUrl ? ` · <a class="dl" href="${esc(o.cleanVideoUrl)}" target="_blank" rel="noopener">Schoon</a>` : ""}<br><span class="note">${esc(o.localPath || "")}</span>` : `<span class="note">${o.renderError ? "Render-fout" : "nog niet gerenderd"}</span>`}</td>
       <td>${plats}</td></tr>`;
   }).join("");
   const events = [
@@ -1048,7 +1048,7 @@ function openModal(id) {
   modalOut = o;
   $("mTitle").textContent = o.title || "Resultaat";
   $("mChips").innerHTML = statusChip(o) + scoreChip(o) + `<span class="chip">${esc((byId[o.island] || {}).short || o.island)}</span>`;
-  let html = (o.videoUrl ? `<video controls src="${esc(o.videoUrl)}" ${o.coverUrl ? `poster="${esc(o.coverUrl)}"` : ""}></video><p class="note">Preview (720p). De 2K-versie om te uploaden staat op je pc: <code>${esc(o.localPath || "F:\\temp\\Playground\\videos")}</code></p>` : "") + md(o.body || o.summary || "");
+  let html = (o.videoUrl ? `<video controls src="${esc(o.videoUrl)}" ${o.coverUrl ? `poster="${esc(o.coverUrl)}"` : ""}></video><p class="note">Preview (720p). De 2K-versie om te uploaden staat op je pc: <code>${esc(o.localPath || "F:\\temp\\Playground\\videos")}</code></p>` : "") + (o.cleanVideoUrl ? `<details class="review"><summary>Schone versie voor docenten (${esc(o.cleanReplaced ?? "?")} vloek${o.cleanReplaced === 1 ? "" : "en"} weggepiept)</summary><video controls preload="none" src="${esc(o.cleanVideoUrl)}"></video><p class="note">Op je pc: <code>${esc(o.cleanLocalPath || "")}</code>. Upload deze als niet-openbare YouTube-video en zet de link in het lespakket.</p></details>` : "") + md(o.body || o.summary || "");
   if (o.clips?.length) html = `<h3>Clips (${o.clips.length})</h3><div class="clipgrid">${o.clips.map(c => `<figure>${c.previewUrl ? `<video controls preload="none" src="${esc(c.previewUrl)}"></video>` : ""}<figcaption><b>${esc(c.hook || c.file)}</b> · ${esc(c.seconds)} s<br>${esc(c.caption || "")}<br><span class="note">${esc((c.hashtags || []).join(" "))}</span><br><code>${esc(c.localPath || "")}</code></figcaption></figure>`).join("")}</div>` + html;
   if (o.packMd) html = `<div class="actions" style="margin:0 0 12px"><button class="btn ok" id="mPrint">Lespakket als PDF (afdrukken)</button></div>` + html;
   if (o.listing) html += `<div class="review"><h4>TPT-listing</h4><p><b>${esc(o.listing.title || "")}</b> · ${o.listing.price ? "$" + esc(o.listing.price) : "gratis"}</p><p>${esc(o.listing.description || "")}</p><p class="note">${esc((o.listing.tags || []).join(" · "))}</p></div>`;
