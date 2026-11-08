@@ -10,4 +10,4 @@ Thijmens Playground is a personal tool used only by its owner, Thijmen Derksen, 
 - **Revoking access:** access can be removed at any time at https://myaccount.google.com/permissions.
 - **Google's policies:** this app uses YouTube API Services. See the YouTube Terms of Service (https://www.youtube.com/t/terms) and the Google Privacy Policy (https://policies.google.com/privacy).
 
-Contact: thijmen@derksenhome.nl
+Contact: via https://github.com/titjeman
