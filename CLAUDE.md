@@ -23,6 +23,7 @@ Ploegleiders loggen per agent tokens/duur in `runs/ploeg-*` (`usage`), zichtbaar
 ## Pc (Windows, C: bijna vol, grote dingen op F:)
 - `C:\Users\thijm\my-video` (skill cartoon-3d-short, Remotion). `PLAYGROUND-RENDER.md` (video-jobs, seriemodus, schone versie) en `PLAYGROUND-CLIPS.md` (clip-jobs).
 - Taakplanner "Playground Render": 19:30 + herkansingen 22:30/01:30/04:30 → `playground/run-render.ps1` → `claude -p`.
+- Taakplanner "Playground Upload": 08:15/13:15 → `playground/run-upload.ps1` → `playground/youtube_upload.py` (gewone Python, 0 Claude-tegoed). Uploadt max 1 klare video per run als privé, ingepland op de eerstvolgende vrije dag 17:00; schone versie als niet-openbaar. Schrijft `youtube.json` + `done.json.youtube`. Setup: `PLAYGROUND-YOUTUBE.md`. OAuth-sleutels in `F:\temp\Playground\secrets\`.
 - `playground/clipper.py` (yt-dlp, faster-whisper, 9:16, ondertitels, hook, punch-in zoom), `playground/audio/clean_mix.py` (schone versie: vloeken eruit knippen, zin opgerekt ≤12%), `playground/voice.py` (Kokoro bm_george).
 - Uitvoer: `F:\temp\Playground\videos\<code>\` (final.mp4, final_clean.mp4, preview*.mp4, done.json). Device-bridge: alleen stage/commit (device_bash werkt niet: te weinig schijfruimte).
 
@@ -35,4 +36,5 @@ Ploegleiders loggen per agent tokens/duur in `runs/ploeg-*` (`usage`), zichtbaar
 
 ## Status (8 nov 2026)
 Gebouwd: ploegen, 13 agents met talenten (zichtbaar als poppetjes), verbruikspagina, volgende-stappen-lijst, schone versie, clip-pijplijn (testjob NASA in de inbox). GTA 6 verschijnt 19 nov.
-Volgende: YouTube-upload automatiseren (officiële API, sleutel op pc) → views automatisch ophalen → geluidseffecten (CC0) voor clips → ElevenLabs → TikTok/Instagram.
+YouTube-upload gebouwd (8 nov), wacht op Thijmens eenmalige Google-setup. Let op: niet-geaudit API-project kan uploads op privé vergrendelen (script meldt dit in `warning`).
+Volgende: Sync-prompt laten meenemen `done.json.youtube` → `outputs/video-*.youtubeUrl` (Thijmen moet akkoord geven) → views automatisch ophalen → geluidseffecten (CC0) voor clips → ElevenLabs → TikTok/Instagram.
