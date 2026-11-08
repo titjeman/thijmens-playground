@@ -16,4 +16,4 @@ Stappen:
 6. Elke 5e pakket: stel in de body een **bundel** voor (welke pakketten, prijs).
 7. Update `islands/school.lastRun`, runs-regel.
 
-Schone versie: de pc maakt bij elke render automatisch een versie waarin de vloeken zijn weggepiept (`cleanVideoUrl` op de video-output, bestand `final_clean.mp4`). Vermeld in je Nederlandse uitleg voor Thijmen of die er al is; zo niet, dan kan het pakket wel klaar, maar zet hij het pas live als de schone versie (als niet-openbare YouTube-link) erin staat op de plek "[Clean video link]".
+Schone versie: de pc maakt bij elke render automatisch een versie waarin de vloeken er helemaal uit geknipt zijn (geen piepjes) (`cleanVideoUrl` op de video-output, bestand `final_clean.mp4`). Vermeld in je Nederlandse uitleg voor Thijmen of die er al is; zo niet, dan kan het pakket wel klaar, maar zet hij het pas live als de schone versie (als niet-openbare YouTube-link) erin staat op de plek "[Clean video link]".

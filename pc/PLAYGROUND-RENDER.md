@@ -34,10 +34,10 @@ Een job bevat `job.json`, `SCRIPT.md`, `episode.md` (shotplan, cast, world, soun
    - `preview.mp4`: `ffmpeg -i final.mp4 -vf scale=720:1280 -c:v libx264 -crf 28 -preset veryfast -c:a aac -b:a 96k preview.mp4` (moet < 18 MB zijn, anders crf 30),
    - `cover.jpg` (een sterk frame, 1080x1920),
    - `platform-texts.md` (kopie uit de job),
-   - **Schone versie voor docenten** (zelfde beeld, vloeken weggepiept):
+   - **Schone versie voor docenten** (zelfde beeld; elke vloek is uit de zin geknipt en de rest van die zin een paar procent opgerekt, zodat alles synchroon blijft):
      1. Zorg dat `stem_voice.wav`, `stem_music.wav` en `stem_sfx.wav` (op mixgain, zoals `warp_mix.py` ze schrijft) en `words.json` in `F:\temp\Playground\work\<code>\` staan.
      2. `python playground/audio/clean_mix.py F:\temp\Playground\work\<code>` → `mix_clean.wav` + `clean_report.json`.
-        Controle: het aantal `replaced` in clean_report.json is gelijk aan het aantal keer "fucking" in SCRIPT.md, `lufs` ≈ -14 en `true_peak` ≤ -1.
+        Controle: het aantal `replaced` in clean_report.json is gelijk aan het aantal keer "fucking" in SCRIPT.md, elke `sentences[].applied` ≤ 1.12, `lufs` ≈ -14 en `true_peak` ≤ -1. Luister de zinnen uit `sentences` kort na in final_clean.mp4.
      3. `ffmpeg -i final.mp4 -i F:/temp/Playground/work/<code>/mix_clean.wav -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k final_clean.mp4`
      4. `preview_clean.mp4`: zoals preview.mp4 maar van final_clean.mp4 (< 18 MB).
    - `done.json`: `{"id": "<outputs-id uit job.json>", "code": "<code>", "seconds": <duur>, "renderedAt": "<ISO>", "qa": "ok|<probleem>", "voice": "<stem>", "clean": {"file": "final_clean.mp4", "preview": "preview_clean.mp4", "replaced": <aantal>}}` (lukt de schone versie niet: `"clean": null` en de reden in `qa`).
