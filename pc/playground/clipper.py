@@ -129,11 +129,20 @@ def candidates(words, loud, top=15, length=40):
     return res
 
 
+MIN_SOURCE_SECONDS = 15 * 60  # we knippen alleen uit lange video's/streams
+
+
 def prepare(jobdir):
     job, code, work, out = load_job(jobdir)
+    for src in job.get("sources", []):
+        if not (src.get("url") or src.get("file")):
+            raise SystemExit("Bron ontbreekt: een clip-job moet naar een bestaande lange video verwijzen.")
     allc = []
     for i, src in enumerate(job.get("sources", [])):
         v = download(src, i, work)
+        dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(v)], capture_output=True, text=True).stdout.strip() or 0)
+        if dur < MIN_SOURCE_SECONDS and not src.get("allowShort"):
+            raise SystemExit(f"Bron {i} is maar {dur/60:.1f} min. Clipjagers knipt alleen highlights uit lange video's (min. 15 min).")
         wav = work / f"src{i}.wav"; extract_wav(v, wav)
         words = transcribe(wav, work / f"words{i}.json", src.get("language"))
         for c in candidates(words, loudness(wav)):
@@ -178,7 +187,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     Path(path).write_text(head + "\n".join(lines) + "\n", encoding="utf-8")
 
 
-def filter_graph(layout, fc, ass_name):
+def punch(zoom_at):
+    """Korte 'punch-in' zoom op het payoff-moment (alleen effect, geen nieuwe beelden)."""
+    if zoom_at is None:
+        return ""
+    z = f"if(gte(it,{zoom_at:.2f}),min(1.12,1+(it-{zoom_at:.2f})*0.6),1)"
+    return f",zoompan=z='{z}':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s={W}x{H}:fps=30"
+
+
+def filter_graph(layout, fc, ass_name, zoom_at=None):
     if layout == "facecam-top" and fc:
         x, y, w, h = fc["x"], fc["y"], fc["w"], fc["h"]
         ch = 692; gh = H - ch
@@ -189,7 +206,7 @@ def filter_graph(layout, fc, ass_name):
         g = (f"[0:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},boxblur=28:2,eq=brightness=-0.08[bg];"
              f"[0:v]scale={W}*1.35:-2,crop={W}:ih[fg];"
              f"[bg][fg]overlay=(W-w)/2:(H-h)/2-40,setsar=1[v0]")
-    return g + f";[v0]ass={ass_name}[v]"
+    return g + f";[v0]setpts=PTS-STARTPTS{punch(zoom_at)},ass={ass_name}[v]"
 
 
 def cut(jobdir):
@@ -205,7 +222,7 @@ def cut(jobdir):
         name = f"clip-{n:02d}.mp4"
         tmp = work / f"_tmp_{name}"
         run(["ffmpeg", "-y", "-v", "error", "-ss", f"{s:.2f}", "-t", f"{e-s:.2f}", "-i", work / f"src{i}.mp4",
-             "-filter_complex", filter_graph(src.get("layout", "gameplay"), src.get("facecam"), ass),
+             "-filter_complex", filter_graph(src.get("layout", "gameplay"), src.get("facecam"), ass, (float(c["zoomAt"]) - s) if c.get("zoomAt") is not None else None),
              "-map", "[v]", "-map", "0:a:0?", "-c:v", "libx264", "-crf", "20", "-preset", "veryfast", "-pix_fmt", "yuv420p",
              "-r", "30", "-c:a", "aac", "-b:a", "160k", "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-movflags", "+faststart", tmp.name],
             cwd=work)
